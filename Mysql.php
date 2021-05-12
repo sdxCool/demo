@@ -104,75 +104,34 @@ class Mysql
         return $result;
     }
 
-    //判断类型
-    function getType($variable)
-    {
-        $varArray = array();
-        for ($i = 0; $i < count($variable); $i++) {
-            $varOne = $variable[$i];
-            switch ($varOne) {
-                case (gettype($varOne) == "integer"):
-                    $varArray[$i] = $varOne;
-                    break;
-                default:
-                    $varArray[$i] = "'" . $varOne[$i] . "'";
-                    break;
-            }
-        }
-        return  $varArray;
+    //添加
+    function addItem($fields,$values,$tableName) {
+        $sql = "insert into " . $tableName;
+        $sql = $sql."(".$fields[0].",".$fields[1].",".$fields[2].",".$fields[3].")";
+        $sql = $sql . " values" . "("."'".$values[0]."'".","."'".$values[1]."'".","."'".$values[2]."'".","."'".$values[3]."'".")";
+        $conn = $this->getMysqlConn();
+        $result = $conn->query($sql);
+        return $result;
     }
 
-    //增加
-    function addItem($fields, $values, $tableName)
-    {
-        $field = "";
-        for ($i = 0; $i < count($fields); $i++) {
-            $field = $field . $fields[$i] . ",";
-        }
-        $value = "";
-        for ($i = 0; $i < count($values); $i++) {
-            //$value = $value.$values[$i].",";
-            if (gettype($values[$i]) == "integer") {
-                $value = $value . $values[$i] . ",";
-            } else {
-                $value =  $value . "'" . $values[$i] . "'" . ",";
-            }
-        }
-        $field = rtrim($field, ",");
-        $value = rtrim($value, ",");
-        $sql = "insert into " . $tableName . " ( " . $field . " ) " . "values ( " . $value . " )";
-        $conn = $this->getOneMysqlConn();
-        $mysqliResult = $conn->query($sql);
-    }
-
-    function updateSqlLink($fields, $values)
-    {
+    function updateSqlLink($fields,$values){
         $length = count($fields);
-        $set = "";
-        for ($i = 0; $i < $length; $i++) {
-            $set = $set . $fields[$i] . " = " . $values[$i] . ",";
+        for($i=0;$i<$length;$i++){
+            $set = $set . $fields[$i] ." = " . "'".$values[$i]."'" . ",";
         }
         $set = rtrim($set, ",");
         return $set;
     }
 
     //修改数据
-    function updateItem($fields, $values, $tableName, $id)
-    {
-        //$values = $this->getType($values);
-        $keyValues = "";
-        for ($i = 0; $i < count($fields); $i++) {
-            if (gettype($values[$i]) == "integer") {
-                $keyValues = $keyValues . $fields[$i] . " = " . $values[$i] . ",";
-            } else {
-                $keyValues = $keyValues . $fields[$i] . " = '" . $values[$i] . "'" . ",";
-            }
-        }
-        $keyValues = rtrim($keyValues, ",");
-        $sql = "update " . $tableName . " set " . $keyValues;
-        $sql = $sql . "where id = " . $id;
-        $conn = $this->getOneMysqlConn();
-        $mysqliResult = $conn->query($sql);
+    function updateItem($fields,$values,$tableName,$id) {    
+        $sql = "update " . $tableName;
+        $set = $this->updateSqlLink($fields,$values);
+        $sql = $sql . ' set ' . $set;
+        $sql = $sql. ' where id= ' . $id;
+        $conn = $this->getMysqlConn();
+        $result = $conn->query($sql);
+        return $result;
     }
 
     //删除
